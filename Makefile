@@ -62,7 +62,7 @@ JQ=| jq . | tee out.json
 # 
 # bring up the stack
 start: opt keys rest-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env
-	$(DOCKER) stack deploy -c docker-compose.yml dpx --with-registry-auth
+	source dpx-container-tags && $(DOCKER) stack deploy -c dpx.yml dpx --with-registry-auth
 
 # check the status of the stack
 status:

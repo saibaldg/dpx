@@ -367,17 +367,18 @@ t.rest.get.vmobjects: auth_token
 		-H  "accept: application/json" \
 		$(JQ)
 
-REST_POLICY_NAME=bastion1-bak-226
-REST_OBJECT_ID=5029d4be-9c23-e5e9-7044-9d4dac632708
 t.rest.patch.vmobjects: auth_token
+	$(call assert_macro,REST_VCENTER_ID)
 	$(call assert_macro,REST_POLICY_NAME)
 	$(call assert_macro,REST_OBJECT_ID)
+	$(call assert_macro,REST_SRC_PATH)
 	$(CURL) \
 		-X PATCH $(SVC_REST)/api/vcenters/$(REST_VCENTER_ID)/vmobjects \
 		-H 'Authorization: $(AUTH_TOKEN)' \
 		-H "accept: application/json" \
 		-H "Content-Type: application/json" \
-		-d '[ { "policy_name": "$(REST_POLCY_NAME)", "object_id": "$(REST_OBJECT_ID)" }]'
+		-d '[ { "policy_name": "$(REST_POLICY_NAME)", "object_id": "$(REST_OBJECT_ID)", "src_path": "$(REST_SRC_PATH)" }]'
+
 
 #
 # tests for vplugin manager service 

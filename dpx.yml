@@ -28,6 +28,8 @@ services:
       replicas: 1
     ports:
       - "8082:8082"
+    volumes:
+      - "./plugins:/app/plugins"
     networks:
       - webnet
   auth:

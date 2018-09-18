@@ -61,7 +61,7 @@ JQ=| jq . | tee out.json
 
 # 
 # bring up the stack
-start: opt keys rest-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env
+start: opt keys rest-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env plugins
 	. ./dpx-container-tags && $(DOCKER) stack deploy -c dpx.yml dpx --with-registry-auth
 
 # check the status of the stack
@@ -77,7 +77,7 @@ clean: stop
 	rm -rf auth_token cookies.txt out.json dpx.env dpx-apigateway.env dpx-vplugin-mgr.env
 
 distclean: clean
-	rm -rf keys opt-auth opt-apigateway rest-logs dpx-apigateway*.env dpx-vplugin-mgr*.env certs-selfsigned certs-letsencrypt api_key catalogic-dpx-ms.id certbot
+	rm -rf keys opt-auth opt-apigateway rest-logs dpx-apigateway*.env dpx-vplugin-mgr*.env certs-selfsigned certs-letsencrypt api_key catalogic-dpx-ms.id certbot plugins
 
 #
 # dpx.env contains env vars shared across various containers
@@ -230,6 +230,8 @@ opt-apigateway: keys
 rest-logs:
 	mkdir rest-logs
 
+plugins:
+	mkdir plugins
 
 #
 # --- USEFUL TARGETS FOR DEV/TEST ---

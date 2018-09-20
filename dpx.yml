@@ -1,19 +1,10 @@
 version: "3"
 services:
-#  master:
-#    image: joylogics/dpx-master:latest
-#    deploy:
-#      replicas: 1
-#    ports:
-#      - "6123:6123"
-#    networks:
-#      - webnet
   rest:
-    image: joylogics/catalogic-dpx-rest-master:latest
+    image: joylogics/catalogic-dpx-rest-master:${TAG_REST}
     env_file:
      - ./dpx.env
     environment:
-#      - DPX_MASTER_HOST=${DPX_MASTER_HOST}
       - _JAVA_OPTIONS=-Dlogging.level.com.catalogic.dpx.rest.commons.DBConn=DEBUG -Dauth.server.public.key.file.path=/key/catalogic.pub
     deploy:
       replicas: 1
@@ -22,28 +13,29 @@ services:
     volumes:
       - "./opt-apigateway:/key"
       - "./rest-logs:/logs"
+      - "./opt-apigateway:/opt"
     networks:
       - "webnet"
   vplugin-mgr:
-    image: joylogics/catalogic-dpx-vplugin-mgr-master:latest
+    image: joylogics/catalogic-dpx-vplugin-mgr-master:${TAG_VPLUGIN_MGR}
     env_file:
      - ./dpx.env
+     - ./dpx-vplugin-mgr.env
     environment:
-#      - DOCKER_HOST_IP=${DPX_MASTER_HOST}
       - AUTH_SERVER_URL=http://auth:8081
       - SVC_SERVER_URL=http://rest:8080
     deploy:
       replicas: 1
     ports:
       - "8082:8082"
+    volumes:
+      - "./plugins:/app/plugins"
     networks:
       - webnet
   auth:
-    image: joylogics/catalogic-dpx-auth-master:latest
+    image: joylogics/catalogic-dpx-auth-master:${TAG_AUTH}
     env_file:
      - ./dpx.env
-#    environment:
-#      - DPX_MASTER_HOST=${DPX_MASTER_HOST}
     deploy:
       replicas: 1
     ports:
@@ -52,28 +44,32 @@ services:
       - "./opt-auth/catalogic.jks:/opt/catalogic.jks"
     networks:
       - webnet
+  config-ui:
+    image: joylogics/catalogic-dpx-ui:${TAG_UI}
+    deploy:
+      replicas: 1
+    ports:
+      - "8083:80"
+    networks:
+      - webnet
   apigateway:
-    image: joylogics/catalogic-dpx-apigateway-master:latest
+    image: joylogics/catalogic-dpx-apigateway-master:${TAG_APIGATEWAY}
+    env_file:
+     - ./dpx-apigateway.env
     environment:
         - zuul_routes_app_url=http://rest:8080/
         - zuul_routes_auth_url=http://auth:8081/
         - zuul_routes_plugin_mgr_url=http://vplugin-mgr:8082/
         - zuul_routes_config_ui_url=http://config-ui:80/
+        - SOCKET_TIMEOUT_MILLIS=120000
     deploy:
       replicas: 1
     ports:
-      - "8085:8085"
+      - "80:8085"
+      - "443:443"
     volumes:
       - "./opt-apigateway:/opt"
     networks:
       -  webnet
-  config-ui:
-    image: joylogics/catalogic-dpx-ui:latest
-    deploy:
-      replicas: 1
-    ports:
-      - "80:80"
-    networks:
-      - webnet
 networks:
-      webnet:
+    webnet:

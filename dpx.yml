@@ -1,11 +1,12 @@
 version: "3"
 services:
   rest:
-    image: joylogics/catalogic-dpx-rest-master:${TAG_REST}
+    image: joylogics/catalogic-dpx-rest:${TAG_REST}
     env_file:
      - ./dpx.env
     environment:
       - _JAVA_OPTIONS=-Dlogging.level.com.catalogic.dpx.rest.commons.DBConn=DEBUG -Dauth.server.public.key.file.path=/key/catalogic.pub
+      - DPX_MAX_CONNECTIONS_PER_USER=6
     deploy:
       replicas: 1
     ports:
@@ -17,7 +18,7 @@ services:
     networks:
       - "webnet"
   vplugin-mgr:
-    image: joylogics/catalogic-dpx-vplugin-mgr-master:${TAG_VPLUGIN_MGR}
+    image: joylogics/catalogic-dpx-vplugin-mgr:${TAG_VPLUGIN_MGR}
     env_file:
      - ./dpx.env
      - ./dpx-vplugin-mgr.env
@@ -33,7 +34,7 @@ services:
     networks:
       - webnet
   auth:
-    image: joylogics/catalogic-dpx-auth-master:${TAG_AUTH}
+    image: joylogics/catalogic-dpx-auth:${TAG_AUTH}
     env_file:
      - ./dpx.env
     deploy:
@@ -53,7 +54,7 @@ services:
     networks:
       - webnet
   apigateway:
-    image: joylogics/catalogic-dpx-apigateway-master:${TAG_APIGATEWAY}
+    image: joylogics/catalogic-dpx-apigateway:${TAG_APIGATEWAY}
     env_file:
      - ./dpx-apigateway.env
     environment:

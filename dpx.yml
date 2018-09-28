@@ -6,6 +6,7 @@ services:
      - ./dpx.env
     environment:
       - _JAVA_OPTIONS=-Dlogging.level.com.catalogic.dpx.rest.commons.DBConn=DEBUG -Dauth.server.public.key.file.path=/key/catalogic.pub
+      - DPX_MAX_CONNECTIONS_PER_USER=6
     deploy:
       replicas: 1
     ports:

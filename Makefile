@@ -41,9 +41,13 @@ help:
 # detect OS then detect hostname, save in 'THIS_HOST'
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-  THIS_HOST = $(shell hostname -I | awk '{print $$1}')
+  DOCKER0_HOST = $(shell ip addr show docker0 | grep 'inet ' | awk '{print $$2}' | cut -f1 -d'/')
+  DOCKER_GWBR_HOST = $(shell ip addr show docker_gwbridge | grep 'inet ' | awk '{print $$2}' | cut -f1 -d'/')
+  THIS_HOST_LIST = $(filter-out $(DOCKER0_HOST) $(DOCKER_GWBR_HOST),$(shell hostname -I))
+  THIS_HOST = $(firstword $(THIS_HOST_LIST))
 endif
 ifeq ($(UNAME_S),Darwin)
+# en1 is the WiFi port on a Macbook (use en0 for the Eth link)
   THIS_HOST = $(shell ipconfig getifaddr en1)
 endif
 
@@ -61,7 +65,12 @@ JQ=| jq . | tee out.json
 
 # 
 # bring up the stack
-start: opt keys rest-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env plugins
+.PHONY: start start-x
+start: 
+	rm -rf dpx.env
+	$(MAKE) start-x
+
+start-x: opt keys rest-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env plugins
 	. ./dpx-container-tags && $(DOCKER) stack deploy -c dpx.yml dpx --with-registry-auth
 
 # check the status of the stack

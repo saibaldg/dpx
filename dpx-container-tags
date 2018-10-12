@@ -1,5 +1,5 @@
-export TAG_REST=master-341
-export TAG_VPLUGIN_MGR=master-143
+export TAG_REST=master-359
+export TAG_VPLUGIN_MGR=develop-151
 export TAG_AUTH=master-61
-export TAG_UI=master-215
+export TAG_UI=master-227
 export TAG_APIGATEWAY=master-62

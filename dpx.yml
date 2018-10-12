@@ -25,6 +25,7 @@ services:
     environment:
       - AUTH_SERVER_URL=http://auth:8081
       - SVC_SERVER_URL=http://rest:8080
+      - S3_BUCKET_FOLDER_NAME=released
     deploy:
       replicas: 1
     ports:

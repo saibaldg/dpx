@@ -1,7 +1,7 @@
 version: "3"
 services:
   rest:
-    image: joylogics/catalogic-dpx-rest:${TAG_REST}
+    image: catalogicsoftware/dpx-rest:${TAG_REST}
     env_file:
      - ./dpx.env
     environment:
@@ -18,7 +18,7 @@ services:
     networks:
       - "webnet"
   vplugin-mgr:
-    image: joylogics/catalogic-dpx-vplugin-mgr:${TAG_VPLUGIN_MGR}
+    image: catalogicsoftware/dpx-vplugin-mgr:${TAG_VPLUGIN_MGR}
     env_file:
      - ./dpx.env
      - ./dpx-vplugin-mgr.env
@@ -35,7 +35,7 @@ services:
     networks:
       - webnet
   auth:
-    image: joylogics/catalogic-dpx-auth:${TAG_AUTH}
+    image: catalogicsoftware/dpx-auth:${TAG_AUTH}
     env_file:
      - ./dpx.env
     deploy:
@@ -47,7 +47,7 @@ services:
     networks:
       - webnet
   config-ui:
-    image: joylogics/catalogic-dpx-ui:${TAG_UI}
+    image: catalogicsoftware/dpx-ui:${TAG_UI}
     deploy:
       replicas: 1
     ports:
@@ -55,7 +55,7 @@ services:
     networks:
       - webnet
   apigateway:
-    image: joylogics/catalogic-dpx-apigateway:${TAG_APIGATEWAY}
+    image: catalogicsoftware/dpx-apigateway:${TAG_APIGATEWAY}
     env_file:
      - ./dpx-apigateway.env
     environment:

@@ -1,4 +1,4 @@
-export TAG_REST=0.15.11
+export TAG_REST=0.15.12
 export TAG_VPLUGIN_MGR=0.0.3
 export TAG_AUTH=0.0.2
 export TAG_UI=0.0.2

@@ -70,7 +70,7 @@ start:
 	rm -rf dpx.env
 	$(MAKE) start-x
 
-start-x: opt keys rest-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env plugins
+start-x: opt keys stack-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env plugins
 	. ./dpx-container-tags && $(DOCKER) stack deploy -c dpx.yml dpx --with-registry-auth
 
 # check the status of the stack
@@ -86,7 +86,7 @@ clean: stop
 	rm -rf auth_token cookies.txt out.json dpx.env dpx-apigateway.env dpx-vplugin-mgr.env
 
 distclean: clean
-	rm -rf keys opt-auth opt-apigateway rest-logs dpx-apigateway*.env dpx-vplugin-mgr*.env certs-selfsigned certs-letsencrypt api_key catalogic-dpx-ms.id certbot plugins
+	rm -rf keys opt-auth opt-apigateway stack-logs dpx-apigateway*.env dpx-vplugin-mgr*.env certs-selfsigned certs-letsencrypt api_key catalogic-dpx-ms.id certbot plugins
 
 #
 # dpx.env contains env vars shared across various containers
@@ -236,8 +236,9 @@ opt-apigateway: keys
 	mkdir -p opt-apigateway
 	grep -v '\-\-\-\-\-' keys/catalogic.pub > opt-apigateway/catalogic.pub
 
-rest-logs:
-	mkdir rest-logs
+stack-logs:
+	mkdir stack-logs
+	chmod 777 stack-logs
 
 plugins:
 	mkdir plugins

@@ -13,10 +13,13 @@ services:
       - "8080:8080"
     volumes:
       - "./opt-apigateway:/key"
-      - "./rest-logs:/logs"
       - "./opt-apigateway:/opt"
     networks:
       - "webnet"
+    logging:
+      driver: "fluentd"
+      options:
+        tag: dpx-rest
   vplugin-mgr:
     image: catalogicsoftware/dpx-vplugin-mgr:${TAG_VPLUGIN_MGR}
     env_file:
@@ -34,6 +37,10 @@ services:
       - "./plugins:/app/plugins"
     networks:
       - webnet
+    logging:
+      driver: "fluentd"
+      options:
+        tag: dpx-vplugin-mgr
   auth:
     image: catalogicsoftware/dpx-auth:${TAG_AUTH}
     env_file:
@@ -46,6 +53,10 @@ services:
       - "./opt-auth/catalogic.jks:/opt/catalogic.jks"
     networks:
       - webnet
+    logging:
+      driver: "fluentd"
+      options:
+        tag: dpx-auth
   config-ui:
     image: catalogicsoftware/dpx-ui:${TAG_UI}
     deploy:
@@ -54,6 +65,10 @@ services:
       - "8083:80"
     networks:
       - webnet
+    logging:
+      driver: "fluentd"
+      options:
+        tag: dpx-ui
   apigateway:
     image: catalogicsoftware/dpx-apigateway:${TAG_APIGATEWAY}
     env_file:
@@ -73,5 +88,18 @@ services:
       - "./opt-apigateway:/opt"
     networks:
       -  webnet
+    logging:
+      driver: "fluentd"
+      options:
+        tag: dpx-apigateway
+  fluentd:
+    image: fluent/fluentd:v1.4-1
+    volumes:
+      - "./config/fluentd/fluent.conf:/fluentd/etc/fluent.conf"
+      - "./stack-logs:/fluentd/log"
+    ports:
+      - "24224:24224"
+    networks:
+      - webnet
 networks:
     webnet:

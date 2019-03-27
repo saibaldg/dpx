@@ -17,6 +17,7 @@ help:
 	@echo '	status - show status of the stack \"dpx\"'
 	@echo '	stop - bring down the stack \"dpx\"'
 	@echo '	clean - clean up the environment'
+	@echo '	update - update stack services'
 	@echo '	== to login to dpx and save the authentication token in the local file =='
 	@echo '	login'
 	@echo '	== some tests on the rest svc =='
@@ -87,6 +88,11 @@ clean: stop
 
 distclean: clean
 	rm -rf keys opt-auth opt-apigateway stack-logs dpx-apigateway*.env dpx-vplugin-mgr*.env certs-selfsigned certs-letsencrypt api_key catalogic-dpx-ms.id certbot plugins
+
+# update docker services
+update:
+	git pull
+	. ./dpx-container-tags && $(DOCKER) stack deploy -c dpx.yml dpx --with-registry-auth
 
 #
 # dpx.env contains env vars shared across various containers

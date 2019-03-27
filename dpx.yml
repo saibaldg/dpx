@@ -95,7 +95,7 @@ services:
   fluentd:
     image: fluent/fluentd:v1.4-1
     volumes:
-      - "./config/fluentd/fluent.conf:/fluentd/etc/fluent.conf"
+      - "./config/fluent.conf:/fluentd/etc/fluent.conf"
       - "./stack-logs:/fluentd/log"
     ports:
       - "24224:24224"

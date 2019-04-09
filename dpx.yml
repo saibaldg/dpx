@@ -68,7 +68,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        tag: dpx-ui
+        tag: dpx-config-ui
   apigateway:
     image: catalogicsoftware/dpx-apigateway:${TAG_APIGATEWAY}
     env_file:

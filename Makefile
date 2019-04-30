@@ -52,6 +52,9 @@ ifeq ($(UNAME_S),Darwin)
   THIS_HOST = $(shell ipconfig getifaddr en1)
 endif
 
+ifndef DPX_MASTER_HOST
+	DPX_MASTER_HOST=$(THIS_HOST)
+endif
 ifndef DPX_MASTER_IP
 	DPX_MASTER_IP=$(THIS_HOST)
 endif
@@ -102,7 +105,7 @@ update:
 # dpx.env contains env vars shared across various containers
 #
 dpx.env: api_key
-	echo "DPX_MASTER_HOST=$(DPX_MASTER_IP)" > $@
+	echo "DPX_MASTER_HOST=$(DPX_MASTER_HOST)" > $@
 	echo "DOCKER_HOST_IP=$(THIS_HOST)" >> $@
 	echo "DPX_INTERNAL_SECRET_KEY=$(shell cat api_key)" >> $@
 

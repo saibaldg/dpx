@@ -52,6 +52,10 @@ ifeq ($(UNAME_S),Darwin)
   THIS_HOST = $(shell ipconfig getifaddr en1)
 endif
 
+ifndef DPX_MASTER_IP
+	DPX_MASTER_IP=$(THIS_HOST)
+endif
+
 # choose docker execution
 DOCKER=docker
 #DOCKER=sudo docker
@@ -98,7 +102,7 @@ update:
 # dpx.env contains env vars shared across various containers
 #
 dpx.env: api_key
-	echo "DPX_MASTER_HOST=$(THIS_HOST)" > $@
+	echo "DPX_MASTER_HOST=$(DPX_MASTER_IP)" > $@
 	echo "DOCKER_HOST_IP=$(THIS_HOST)" >> $@
 	echo "DPX_INTERNAL_SECRET_KEY=$(shell cat api_key)" >> $@
 
@@ -406,7 +410,6 @@ SVC_VPMGR=https://$(THIS_HOST):8082
 else
 SVC_VPMGR=https://$(THIS_HOST)/plugin-mgr
 endif
-DPX_MASTER_IP=$(THIS_HOST)
 t.vpmgr.login:
 	$(call assert_macro,DPX_USERNAME)
 	$(call assert_macro,DPX_PASSWORD)

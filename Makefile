@@ -91,6 +91,8 @@ distclean: clean
 
 # update docker services
 update:
+	$(DOCKER) stack rm dpx
+	./stack-wait.sh
 	git pull
 	. ./dpx-container-tags && $(DOCKER) stack deploy -c dpx.yml dpx --with-registry-auth
 

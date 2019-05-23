@@ -62,7 +62,7 @@ services:
     deploy:
       replicas: 1
     ports:
-      - "8083:80"
+      - "8088:8088"
     networks:
       - webnet
     logging:
@@ -77,12 +77,11 @@ services:
         - zuul_routes_app_url=http://rest:8080/
         - zuul_routes_auth_url=http://auth:8081/
         - zuul_routes_plugin_mgr_url=http://vplugin-mgr:8082/
-        - zuul_routes_config_ui_url=http://config-ui:80/
+        - zuul_routes_config_ui_url=http://config-ui:8088/
         - SOCKET_TIMEOUT_MILLIS=120000
     deploy:
       replicas: 1
     ports:
-      - "80:8085"
       - "443:443"
     volumes:
       - "./opt-apigateway:/opt"

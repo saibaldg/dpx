@@ -82,6 +82,7 @@ services:
     deploy:
       replicas: 1
     ports:
+      - "80:8085"
       - "443:443"
     volumes:
       - "./opt-apigateway:/opt"

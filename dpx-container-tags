@@ -1,5 +1,5 @@
 export TAG_REST=latest
 export TAG_VPLUGIN_MGR=latest
 export TAG_AUTH=latest
-export TAG_UI=0.0.1
+export TAG_UI=latest
 export TAG_APIGATEWAY=latest

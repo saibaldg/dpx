@@ -8,7 +8,11 @@ services:
       - _JAVA_OPTIONS=-Dlogging.level.com.catalogic.dpx.rest.commons.DBConn=DEBUG -Dauth.server.public.key.file.path=/key/catalogic.pub
       - DPX_MAX_CONNECTIONS_PER_USER=6
     deploy:
-      replicas: 1
+      replicas: 2
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        delay: 10s
     ports:
       - "8080:8080"
     volumes:
@@ -30,7 +34,16 @@ services:
       - SVC_SERVER_URL=http://rest:8080
       - S3_BUCKET_FOLDER_NAME=released
     deploy:
-      replicas: 1
+      replicas: 2
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        delay: 10s
+    healthcheck:
+      test: wget -qO- http://localhost:8082/actuator/health | grep -q '"UP"' || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
     ports:
       - "8082:8082"
     volumes:
@@ -46,7 +59,16 @@ services:
     env_file:
      - ./dpx.env
     deploy:
-      replicas: 1
+      replicas: 2
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        delay: 10s
+    healthcheck:
+      test: wget -qO- http://localhost:8081/actuator/health | grep -q '"UP"' || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
     ports:
       - "8081:8081"
     volumes:
@@ -60,7 +82,16 @@ services:
   config-ui:
     image: catalogicsoftware/dpx-ui:${TAG_UI}
     deploy:
-      replicas: 1
+      replicas: 2
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        delay: 10s
+    healthcheck:
+      test: wget -qO- http://localhost:8088/ || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
     ports:
       - "8088:8088"
     networks:
@@ -80,7 +111,16 @@ services:
         - zuul_routes_config_ui_url=http://config-ui:8088/
         - SOCKET_TIMEOUT_MILLIS=120000
     deploy:
-      replicas: 1
+      replicas: 2
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        delay: 10s
+    healthcheck:
+      test: wget -qO- http://localhost:8085/ || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
     ports:
       - "80:8085"
       - "443:443"

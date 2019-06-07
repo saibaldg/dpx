@@ -72,7 +72,7 @@ start:
 	$(MAKE) start-x
 
 start-x: opt keys stack-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env plugins
-	. ./dpx-container-tags && $(DOCKER) stack deploy -c dpx.yml dpx --with-registry-auth
+	. ./dpx-container-tags && export START_DATE=$(DATE) && $(DOCKER) stack deploy -c dpx.yml dpx --with-registry-auth
 
 # check the status of the stack
 status:

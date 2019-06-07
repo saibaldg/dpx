@@ -7,6 +7,7 @@ services:
     environment:
       - _JAVA_OPTIONS=-Dlogging.level.com.catalogic.dpx.rest.commons.DBConn=DEBUG -Dauth.server.public.key.file.path=/key/catalogic.pub
       - DPX_MAX_CONNECTIONS_PER_USER=6
+      - START_DATE=${START_DATE}
     deploy:
       replicas: 2
       update_config:
@@ -33,8 +34,9 @@ services:
       - AUTH_SERVER_URL=http://auth:8081
       - SVC_SERVER_URL=http://rest:8080
       - S3_BUCKET_FOLDER_NAME=released
+      - START_DATE=${START_DATE}
     deploy:
-      replicas: 2
+      replicas: 1
       update_config:
         parallelism: 1
         failure_action: rollback
@@ -56,6 +58,8 @@ services:
         tag: dpx-vplugin-mgr
   auth:
     image: catalogicsoftware/dpx-auth:${TAG_AUTH}
+    environment:
+      - START_DATE=${START_DATE}
     env_file:
      - ./dpx.env
     deploy:
@@ -65,7 +69,7 @@ services:
         failure_action: rollback
         delay: 10s
     healthcheck:
-      test: wget -qO- http://localhost:8081/actuator/health | grep -q '"UP"' || exit 1
+#      test: wget -qO- http://localhost:8081/actuator/health | grep -q '"UP"' || exit 1
       interval: 30s
       timeout: 5s
       retries: 3
@@ -81,6 +85,8 @@ services:
         tag: dpx-auth
   config-ui:
     image: catalogicsoftware/dpx-ui:${TAG_UI}
+    environment:
+      - START_DATE=${START_DATE}
     deploy:
       replicas: 2
       update_config:
@@ -110,6 +116,7 @@ services:
         - zuul_routes_plugin_mgr_url=http://vplugin-mgr:8082/
         - zuul_routes_config_ui_url=http://config-ui:8088/
         - SOCKET_TIMEOUT_MILLIS=120000
+        - START_DATE=${START_DATE}
     deploy:
       replicas: 2
       update_config:

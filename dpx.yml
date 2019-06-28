@@ -7,6 +7,9 @@ services:
     environment:
       - _JAVA_OPTIONS=-Dlogging.level.com.catalogic.dpx.rest.commons.DBConn=DEBUG -Dauth.server.public.key.file.path=/key/catalogic.pub
       - DPX_MAX_CONNECTIONS_PER_USER=6
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://sql-db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=secret
     deploy:
       replicas: 1
     ports:
@@ -16,10 +19,33 @@ services:
       - "./opt-apigateway:/opt"
     networks:
       - "webnet"
+    depends_on:
+      - "sql-db"
     logging:
       driver: "fluentd"
       options:
         tag: dpx-rest
+  sql-db:
+    image: postgres:11
+    deploy:
+      replicas: 1
+    ports:
+      - target: 5432
+        published: 5433
+        protocol: tcp
+        mode: host
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - "./pgdata:/var/lib/postgresql/data/pgdata"
+    networks:
+      - "webnet"
+    logging:
+      driver: "fluentd"
+      options:
+        tag: dpx-sql-db
   vplugin-mgr:
     image: catalogicsoftware/dpx-vplugin-mgr:${TAG_VPLUGIN_MGR}
     env_file:

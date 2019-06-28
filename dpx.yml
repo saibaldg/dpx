@@ -39,7 +39,7 @@ services:
       - POSTGRES_PASSWORD=secret
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      - "./pgdata:/var/lib/postgresql/data/pgdata"
+      - "./rest-db:/var/lib/postgresql/data/pgdata"
     networks:
       - "webnet"
     logging:

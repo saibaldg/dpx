@@ -69,7 +69,7 @@ JQ=| jq . | tee out.json
 .PHONY: start start-x
 start: 
 	rm -rf dpx.env
-	mkdir rest-db
+	mkdir -p rest-db
 	$(MAKE) start-x
 
 start-x: opt keys stack-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env plugins

@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 services:
   rest:
     image: catalogicsoftware/dpx-rest:${TAG_REST}
@@ -8,12 +8,11 @@ services:
       - _JAVA_OPTIONS=-Dlogging.level.com.catalogic.dpx.rest.commons.DBConn=DEBUG -Dauth.server.public.key.file.path=/key/catalogic.pub
       - DPX_MAX_CONNECTIONS_PER_USER=6
       - START_DATE=${START_DATE}
+      - START_DATE1=6
     deploy:
       replicas: 2
       update_config:
-        parallelism: 1
         failure_action: rollback
-        delay: 10s
     ports:
       - "8080:8080"
     volumes:
@@ -38,9 +37,7 @@ services:
     deploy:
       replicas: 1
       update_config:
-        parallelism: 1
         failure_action: rollback
-        delay: 10s
     healthcheck:
       test: wget -qO- http://localhost:8082/actuator/health | grep -q '"UP"' || exit 1
       interval: 30s
@@ -65,9 +62,7 @@ services:
     deploy:
       replicas: 2
       update_config:
-        parallelism: 1
         failure_action: rollback
-        delay: 10s
     healthcheck:
 #      test: wget -qO- http://localhost:8081/actuator/health | grep -q '"UP"' || exit 1
       interval: 30s
@@ -85,14 +80,15 @@ services:
         tag: dpx-auth
   config-ui:
     image: catalogicsoftware/dpx-ui:${TAG_UI}
+    env_file:
+     - ./dpx-apigateway.env
+     - ./dpx.env
     environment:
       - START_DATE=${START_DATE}
     deploy:
       replicas: 2
       update_config:
-        parallelism: 1
         failure_action: rollback
-        delay: 10s
     healthcheck:
       test: wget -qO- http://localhost:8088/ || exit 1
       interval: 30s
@@ -110,6 +106,7 @@ services:
     image: catalogicsoftware/dpx-apigateway:${TAG_APIGATEWAY}
     env_file:
      - ./dpx-apigateway.env
+     - ./dpx.env
     environment:
         - zuul_routes_app_url=http://rest:8080/
         - zuul_routes_auth_url=http://auth:8081/
@@ -120,9 +117,7 @@ services:
     deploy:
       replicas: 2
       update_config:
-        parallelism: 1
         failure_action: rollback
-        delay: 10s
     healthcheck:
       test: wget -qO- http://localhost:8085/ || exit 1
       interval: 30s
@@ -141,12 +136,24 @@ services:
         tag: dpx-apigateway
   fluentd:
     image: fluent/fluentd:v1.4-1
+#    environment:
+#      - START_DATE=${START_DATE}
+    env_file:
+     - ./dpx-apigateway.env
+     - ./dpx.env
     volumes:
-      - "./config/fluent.conf:/fluentd/etc/fluent.conf"
+#      - "./config/fluent.conf:/fluentd/etc/fluent.conf"
       - "./stack-logs:/fluentd/log"
     ports:
       - "24224:24224"
+    configs:
+      - source: fluentd_conf
+        target: /fluentd/etc/fluent.conf
     networks:
       - webnet
+configs:
+  fluentd_conf:
+    name: fluentd_conf-${FLUENTD_CONFIG_DIGEST}
+    file: ./config/fluent.conf
 networks:
     webnet:

@@ -145,7 +145,7 @@ services:
       - webnet
 configs:
   fluentd_conf:
-    name: fluentd_conf-${FLUENTD_CONFIG_DIGEST}
+    name: fluentd_conf${FLUENTD_CONFIG_DIGEST}
     file: ./config/fluent.conf
 networks:
     webnet:

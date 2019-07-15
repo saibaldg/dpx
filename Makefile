@@ -71,7 +71,7 @@ start:
 	rm -rf dpx.env
 	$(MAKE) start-x
 
-start-x: opt keys stack-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env plugins
+start-x: opt keys stack-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env plugins remove-old-images
 	. ./dpx-container-tags && $(DOCKER) stack deploy -c dpx.yml dpx --with-registry-auth
 
 # check the status of the stack
@@ -103,6 +103,21 @@ dpx.env: api_key
 	echo "DPX_MASTER_HOST=$(THIS_HOST)" > $@
 	echo "DOCKER_HOST_IP=$(THIS_HOST)" >> $@
 	echo "DPX_INTERNAL_SECRET_KEY=$(shell cat api_key)" >> $@
+
+# this command keeps only 3 most recent versions for each docker image
+remove-old-images: 
+	-$(call remove_old_docker_images,'catalogicsoftware/dpx-vplugin-mgr')
+	-$(call remove_old_docker_images,'catalogicsoftware/dpx-rest')
+	-$(call remove_old_docker_images,'catalogicsoftware/dpx-auth')
+	-$(call remove_old_docker_images,'catalogicsoftware/dpx-ui')
+	-$(call remove_old_docker_images,'catalogicsoftware/dpx-apigateway')
+	-$(call remove_old_docker_images,'fluent/fluentd')
+#	-$(DOCKER) rmi 	$(shell $(DOCKER) images --filter=reference='catalogicsoftware/dpx-rest' --format "{{.ID}}" | tail -n +4 )
+
+define remove_old_docker_images	
+	$(eval container_hash := $(shell $(DOCKER) images --filter=reference=$(1) --format "{{.ID}}" | tail -n +4 ) )
+	-$(DOCKER) 2>/dev/null 1>&2 rmi $(container_hash) || true
+endef
 
 # api_key is the shared secret amongst containers
 api_key:

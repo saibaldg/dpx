@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 services:
   rest:
     image: catalogicsoftware/dpx-rest:${TAG_REST}
@@ -7,8 +7,11 @@ services:
     environment:
       - _JAVA_OPTIONS=-Dlogging.level.com.catalogic.dpx.rest.commons.DBConn=DEBUG -Dauth.server.public.key.file.path=/key/catalogic.pub
       - DPX_MAX_CONNECTIONS_PER_USER=6
+      - START_DATE=${START_DATE}
     deploy:
-      replicas: 1
+      replicas: 2
+      update_config:
+        failure_action: rollback
     ports:
       - "8080:8080"
     volumes:
@@ -29,8 +32,18 @@ services:
       - AUTH_SERVER_URL=http://auth:8081
       - SVC_SERVER_URL=http://rest:8080
       - S3_BUCKET_FOLDER_NAME=released
+      - START_DATE=${START_DATE}
     deploy:
       replicas: 1
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        delay: 10s
+    healthcheck:
+      test: wget -qO- http://localhost:8082/actuator/health | grep -q '"UP"' || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
     ports:
       - "8082:8082"
     volumes:
@@ -43,10 +56,19 @@ services:
         tag: dpx-vplugin-mgr
   auth:
     image: catalogicsoftware/dpx-auth:${TAG_AUTH}
+    environment:
+      - START_DATE=${START_DATE}
     env_file:
      - ./dpx.env
     deploy:
-      replicas: 1
+      replicas: 2
+      update_config:
+        failure_action: rollback
+    healthcheck:
+#      test: wget -qO- http://localhost:8081/actuator/health | grep -q '"UP"' || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
     ports:
       - "8081:8081"
     volumes:
@@ -59,8 +81,17 @@ services:
         tag: dpx-auth
   config-ui:
     image: catalogicsoftware/dpx-ui:${TAG_UI}
+    environment:
+      - START_DATE=${START_DATE}
     deploy:
-      replicas: 1
+      replicas: 2
+      update_config:
+        failure_action: rollback
+    healthcheck:
+      test: wget -qO- http://localhost:8088/ || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
     ports:
       - "8088:8088"
     networks:
@@ -79,8 +110,16 @@ services:
         - zuul_routes_plugin_mgr_url=http://vplugin-mgr:8082/
         - zuul_routes_config_ui_url=http://config-ui:8088/
         - SOCKET_TIMEOUT_MILLIS=120000
+        - START_DATE=${START_DATE}
     deploy:
-      replicas: 1
+      replicas: 2
+      update_config:
+        failure_action: rollback
+    healthcheck:
+      test: wget -qO- http://localhost:8085/ || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
     ports:
       - "80:8085"
       - "443:443"
@@ -95,11 +134,18 @@ services:
   fluentd:
     image: fluent/fluentd:v1.4-1
     volumes:
-      - "./config/fluent.conf:/fluentd/etc/fluent.conf"
+#      - "./config/fluent.conf:/fluentd/etc/fluent.conf"
       - "./stack-logs:/fluentd/log"
     ports:
       - "24224:24224"
+    configs:
+      - source: fluentd_conf
+        target: /fluentd/etc/fluent.conf
     networks:
       - webnet
+configs:
+  fluentd_conf:
+    name: fluentd_conf${FLUENTD_CONFIG_DIGEST}
+    file: ./config/fluent.conf
 networks:
     webnet:

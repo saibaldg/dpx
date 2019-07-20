@@ -18,6 +18,7 @@ help:
 	@echo '	stop - bring down the stack \"dpx\"'
 	@echo '	clean - clean up the environment'
 	@echo '	update - update stack services'
+	@echo '	force-update - remove the stack then start it'
 	@echo '	== to login to dpx and save the authentication token in the local file =='
 	@echo '	login'
 	@echo '	== some tests on the rest svc =='
@@ -91,6 +92,9 @@ distclean: clean
 
 # update docker services
 update:
+	. ./dpx-container-tags && export FLUENTD_CONFIG_DIGEST=$(shell date -r ./config/fluent.conf +%s) && export START_DATE=$(shell date --iso-8601=seconds) && $(DOCKER) stack deploy --prune -c dpx.yml dpx --with-registry-auth
+
+force-update:
 	$(DOCKER) stack rm dpx
 	./stack-wait.sh
 	git pull

@@ -71,7 +71,7 @@ start:
 	rm -rf dpx.env
 	$(MAKE) start-x
 
-start-x: opt keys stack-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env plugins remove-old-images
+start-x: opt keys stack-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env plugins
 	. ./dpx-container-tags && $(DOCKER) stack deploy -c dpx.yml dpx --with-registry-auth
 
 # check the status of the stack
@@ -90,7 +90,7 @@ distclean: clean
 	rm -rf keys opt-auth opt-apigateway stack-logs dpx-apigateway*.env dpx-vplugin-mgr*.env certs-selfsigned certs-letsencrypt api_key catalogic-dpx-ms.id certbot plugins
 
 # update docker services
-update:
+update: remove-old-images
 	$(DOCKER) stack rm dpx
 	./stack-wait.sh
 	git pull

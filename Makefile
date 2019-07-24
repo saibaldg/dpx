@@ -18,7 +18,6 @@ help:
 	@echo '	stop - bring down the stack \"dpx\"'
 	@echo '	clean - clean up the environment'
 	@echo '	update - update stack services'
-	@echo '	force-update - remove the stack then start it'
 	@echo '	== to login to dpx and save the authentication token in the local file =='
 	@echo '	login'
 	@echo '	== some tests on the rest svc =='
@@ -70,6 +69,7 @@ JQ=| jq . | tee out.json
 .PHONY: start start-x
 start: 
 	rm -rf dpx.env
+	mkdir -p rest-db
 	$(MAKE) start-x
 
 start-x: opt keys stack-logs dpx.env dpx-vplugin-mgr.env dpx-apigateway.env plugins
@@ -88,13 +88,10 @@ clean: stop
 	rm -rf auth_token cookies.txt out.json dpx.env dpx-apigateway.env dpx-vplugin-mgr.env
 
 distclean: clean
-	rm -rf keys opt-auth opt-apigateway stack-logs dpx-apigateway*.env dpx-vplugin-mgr*.env certs-selfsigned certs-letsencrypt api_key catalogic-dpx-ms.id certbot plugins
+	rm -rf keys opt-auth opt-apigateway stack-logs dpx-apigateway*.env dpx-vplugin-mgr*.env certs-selfsigned certs-letsencrypt api_key catalogic-dpx-ms.id certbot plugins rest-db
 
 # update docker services
-update: remove-old-images
-	. ./dpx-container-tags && export FLUENTD_CONFIG_DIGEST=$(shell date -r ./config/fluent.conf +%s) && export START_DATE=$(shell date --iso-8601=seconds) && $(DOCKER) stack deploy --prune -c dpx.yml dpx --with-registry-auth
-
-force-update: remove-old-images
+update:
 	$(DOCKER) stack rm dpx
 	./stack-wait.sh
 	git pull
@@ -107,21 +104,6 @@ dpx.env: api_key
 	echo "DPX_MASTER_HOST=$(THIS_HOST)" > $@
 	echo "DOCKER_HOST_IP=$(THIS_HOST)" >> $@
 	echo "DPX_INTERNAL_SECRET_KEY=$(shell cat api_key)" >> $@
-
-# this command keeps only 3 most recent versions for each docker image
-remove-old-images: 
-	-$(call remove_old_docker_images,'catalogicsoftware/dpx-vplugin-mgr')
-	-$(call remove_old_docker_images,'catalogicsoftware/dpx-rest')
-	-$(call remove_old_docker_images,'catalogicsoftware/dpx-auth')
-	-$(call remove_old_docker_images,'catalogicsoftware/dpx-ui')
-	-$(call remove_old_docker_images,'catalogicsoftware/dpx-apigateway')
-	-$(call remove_old_docker_images,'fluent/fluentd')
-#	-$(DOCKER) rmi 	$(shell $(DOCKER) images --filter=reference='catalogicsoftware/dpx-rest' --format "{{.ID}}" | tail -n +4 )
-
-define remove_old_docker_images	
-	$(eval container_hash := $(shell $(DOCKER) images --filter=reference=$(1) --format "{{.ID}}" | tail -n +4 ) )
-	-$(DOCKER) 2>/dev/null 1>&2 rmi $(container_hash) || true
-endef
 
 # api_key is the shared secret amongst containers
 api_key:
